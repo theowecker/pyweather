@@ -3,8 +3,10 @@
 import argparse
 import json
 import pycountry
+import style
 import sys
 import time
+
 from configparser import ConfigParser
 from datetime import datetime
 from pprint import pp
@@ -14,6 +16,18 @@ from urllib import error, parse, request
 # if 60 > deg > 120 W arrow... or make dynamic arrow?
 
 WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather"
+
+# Weather Condition Codes
+# https://openweathermap.org/weather-conditions#Weather-Condition-Codes-2
+THUNDERSTORM = range(200, 300)
+DRIZZLE = range(300, 400)
+RAIN = range(500, 600)
+SNOW = range(600, 700)
+ATMOSPHERE = range(700, 800)
+CLEAR = range(800, 801)
+CLOUDY = range(801, 900)
+
+
 
 def weather_query_builder(city_input, metric=False):
     api_key = _get_api_key()
@@ -42,6 +56,18 @@ def get_weather_data(query_url):
         return json.loads(data)
     except json.JSONDecodeError:
         sys.exit("Couldn't parse the server response. Try again.")
+
+# def display_weather(weather_data, metric=False):
+#     weather_dict = {}
+#     city = weather_data["name"]
+#     weather_description = weather_data["weather"][0]["description"]
+#     temperature = weather_data["main"]["temp"]
+#     feels_like = weather_data['main']['feels_like']
+#     return {city: weather_data["name"], 
+#             weather_description: weather_data["weather"][0]["description"], 
+#             temperature: weather_data["main"]["temp"], 
+#             feels_like: weather_data['main']['feels_like']}
+
 
 def get_time(epoch_time):
     my_time = time.strftime('%I:%M %p', time.localtime(epoch_time))
@@ -85,13 +111,25 @@ if __name__ == "__main__":
     user_args = read_user_cli_args()
     query_url = weather_query_builder(user_args.city, user_args.metric)
     weather_data = get_weather_data(query_url)
+    # display_weather = display_weather(weather_data)
     units = f"°{'C' if user_args.metric else 'F'}"
     local_time = get_time(int(weather_data['dt']))
     current_time = datetime.now()
     country = get_country(weather_data['sys']['country'])
 
     # pp(weather_data)
-    print(f"Current time: {current_time.strftime('%I:%M %p')} Local time: {local_time} \n")
-    print(f"The weather in {weather_data['name']}, {country}")
+    style.change_color(style.BLUE)
+    print("==============================================")
+    print(f"Current time: {current_time.strftime('%I:%M %p')} || Local time: {local_time}")
+    print("==============================================")
+    style.change_color(style.RESET)
+
+    print(f"The weather in...")
+    
+    style.change_color(style.REVERSE)
+    print(f"{weather_data['name']}, {country}  {style.RESET:^{style.PADDING}}")
+
+    style.change_color(style.RED)
     print(f"{weather_data['weather'][0]['description']}".title())
+    style.change_color(style.RESET)
     print(f"{weather_data['main']['temp']} {units} (feels like {weather_data['main']['feels_like']} {units})")
