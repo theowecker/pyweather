@@ -106,18 +106,17 @@ def _get_api_key():
     config.read("secrets.ini")
     return config["openweather"]["api_key"]
 
+def display_weather(weather_data, metric=False):
 
-if __name__ == "__main__":
-    user_args = read_user_cli_args()
-    query_url = weather_query_builder(user_args.city, user_args.metric)
-    weather_data = get_weather_data(query_url)
-    # display_weather = display_weather(weather_data)
+    city = weather_data["name"]
+    weather_description = weather_data["weather"][0]["description"]
+    temperature = weather_data["main"]["temp"]
     units = f"°{'C' if user_args.metric else 'F'}"
     local_time = get_time(int(weather_data['dt']))
     current_time = datetime.now()
     country = get_country(weather_data['sys']['country'])
+    feels_like = weather_data['main']['feels_like']
 
-    # pp(weather_data)
     style.change_color(style.BLUE)
     print("==============================================")
     print(f"Current time: {current_time.strftime('%I:%M %p')} || Local time: {local_time}")
@@ -127,9 +126,21 @@ if __name__ == "__main__":
     print(f"The weather in...")
     
     style.change_color(style.REVERSE)
-    print(f"{weather_data['name']}, {country}  {style.RESET:^{style.PADDING}}")
+    print(f"{city}, {country}  {style.RESET:^{style.PADDING}}")
 
     style.change_color(style.RED)
-    print(f"{weather_data['weather'][0]['description']}".title())
+    print(f"{weather_description}".title())
     style.change_color(style.RESET)
-    print(f"{weather_data['main']['temp']} {units} (feels like {weather_data['main']['feels_like']} {units})")
+    print(f"{temperature} {units} (feels like {feels_like} {units})")
+
+
+
+if __name__ == "__main__":
+    user_args = read_user_cli_args()
+    query_url = weather_query_builder(user_args.city, user_args.metric)
+    weather_data = get_weather_data(query_url)
+    
+    display_weather(weather_data, user_args.metric)
+
+
+    # pp(weather_data)
