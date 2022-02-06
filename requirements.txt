@@ -1,0 +1,5 @@
+#### Requirements without Version Specifiers ####
+pprint
+
+#### Requirements with Version Specifiers ####
+pycountry == 22.1.10
